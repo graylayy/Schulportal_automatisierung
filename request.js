@@ -1,7 +1,10 @@
 const { createClient } = require("webdav");
 const fs = require('fs')
 const path = require('path');
-var credentials=[0];
+const { type } = require("os");
+
+
+const kurse=["kr-gk-4","d-gk-2","e-pk-2","mu-gk-2","d-gk-2","if-gk-1","e-gk-2","m-lk-2","ek-lk-2","ch-gk-2","sw-gk-2","stufe"]
 
 async function GetCredentials(){  
     const credentialsPath = path.join(__dirname,"/credentials.json")
@@ -13,37 +16,70 @@ async function GetCredentials(){
                 return reject(err)
             }
             const credentials= [JSON.parse(data).username,JSON.parse(data).password];
-            //console.log(credentials)
             return resolve(credentials);
         })
     }    
 )}
 
-async function Getcontent(client){
-    
-    const kurse=["kr-gk-4","d-gk-2","e-pk-2","mu-gk-2","d-gk-2","if-gk-1","e-gk-2","m-lk-2","ek-lk-2","ch-gk-2","sw-gk-2","stufe"]
-    var requestUrl="/22-"+kurse[0]+"@magydo.schulportal-erzbistum-pb.de/storage"
-    console.log(requestUrl);
-    const items = await client.getDirectoryContents(requestUrl);
-    console.log(items)
-    console.log(items[0].type)
+function InitializeClient(credentials){
+    return new Promise(function(resolve) {
+                
+        var client = createClient(
+            "https://www.schulportal-erzbistum-pb.de/webdav.php",
+            {
+                username: credentials[0],
+                password: credentials[1]
+            }
+        );
+        return resolve(client);})
 }
 
-function main(){
-     GetCredentials()
-        .then((credentials) =>{
-            return new Promise(function(resolve) {
-                
-                const client = createClient(
-                    "https://www.schulportal-erzbistum-pb.de/webdav.php",
-                    {
-                        username: credentials[0],
-                        password: credentials[1]
-                    }
-                );
-                return resolve(client);
-            })
-        })
-        .then((client)=> Getcontent(client));
+async function GetAllContent(client){
+    var items=[];
+    var request;
+    var requestUrl;
+    for(i=0;i<kurse.length;i++){
+        requestUrl="/22-"+kurse[i]+"@magydo.schulportal-erzbistum-pb.de/storage"
+        request = await client.getDirectoryContents(requestUrl);
+        items.push(request)
+    }
+    return items; 
 }
-main();
+
+async function GetFolderContent(client,klassNr,folderName){
+    var requestUrl="/22-"+kurse[klassNr]+"@magydo.schulportal-erzbistum-pb.de/storage/"+folderName
+    folderContent= await client.getDirectoryContents(requestUrl);
+    return folderContent
+}
+
+module.exports.requestAll =function requestAll(){
+    return new Promise(function(resolve) {   
+        if(typeof(client)==='undefined'){
+                GetCredentials()
+                .then((credentials) =>InitializeClient(credentials))
+                .then((client)=>intitedclient=client)
+                .then((intitedclient)=> GetAllContent(intitedclient))
+                .then((items)=>{ return resolve(items)});
+            } else{
+                GetAllContent(client)
+                .then((items)=>{ return resolve(items)});
+            }
+        
+    })
+}
+
+module.exports.requestFolder =function requestFolder(klassNr,folderName){
+    return new Promise(function(resolve) {
+        if(typeof (intitedclient) ==='undefined'){
+            console.log(typeof(client))
+            GetCredentials()
+            .then((credentials) =>InitializeClient(credentials))
+            .then((client)=>GetFolderContent(client,klassNr,folderName))
+            .then((folderContent)=>{ return resolve(folderContent)});
+        }else{
+            GetFolderContent(intitedclient,klassNr,folderName)
+            .then((folderContent)=>{ return resolve(folderContent)});
+
+        }
+    })
+}
