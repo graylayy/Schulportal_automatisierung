@@ -1,21 +1,19 @@
 const { createClient } = require("webdav");
 const fs = require('fs')
 const path = require('path');
-const { type } = require("os");
 
 
 const kurse=["kr-gk-4","d-gk-2","e-pk-2","mu-gk-2","d-gk-2","if-gk-1","e-gk-2","m-lk-2","ek-lk-2","ch-gk-2","sw-gk-2","stufe"]
 
 async function GetCredentials(){  
-    const credentialsPath = path.join(__dirname,"/credentials.json")
-    
+    const credentialsPath = path.join(__dirname,"..","/credentials.json")
     return new Promise(function(resolve, reject) {
         fs.readFile(credentialsPath, 'utf8' , (err, data) => {
             if (err) {
                 console.error(err)
                 return reject(err)
             }
-            const credentials= [JSON.parse(data).username,JSON.parse(data).password];
+            const credentials= [JSON.parse(data)[0].username,JSON.parse(data)[0].password];
             return resolve(credentials);
         })
     }    
@@ -39,7 +37,7 @@ async function GetAllContent(client){
     var request;
     var requestUrl;
     for(i=0;i<kurse.length;i++){
-        requestUrl="/22-"+kurse[i]+"@magydo.schulportal-erzbistum-pb.de/storage"
+        requestUrl="/22-"+kurse[i]+"@magydo.schulportal-erzbistum-pb.de"
         request = await client.getDirectoryContents(requestUrl);
         items.push(request)
     }
@@ -54,14 +52,14 @@ async function GetFolderContent(client,klassNr,folderName){
 
 module.exports.requestAll =function requestAll(){
     return new Promise(function(resolve) {   
-        if(typeof(client)==='undefined'){
-                GetCredentials()
+        if(typeof(intitedclient)==='undefined'){  
+            GetCredentials()
                 .then((credentials) =>InitializeClient(credentials))
                 .then((client)=>intitedclient=client)
                 .then((intitedclient)=> GetAllContent(intitedclient))
                 .then((items)=>{ return resolve(items)});
             } else{
-                GetAllContent(client)
+                GetAllContent(intitedclient)
                 .then((items)=>{ return resolve(items)});
             }
         
@@ -71,10 +69,10 @@ module.exports.requestAll =function requestAll(){
 module.exports.requestFolder =function requestFolder(klassNr,folderName){
     return new Promise(function(resolve) {
         if(typeof (intitedclient) ==='undefined'){
-            console.log(typeof(client))
             GetCredentials()
             .then((credentials) =>InitializeClient(credentials))
-            .then((client)=>GetFolderContent(client,klassNr,folderName))
+            .then((client)=>intitedclient=client)
+            .then((intitedclient)=>GetFolderContent(intitedclient,klassNr,folderName))
             .then((folderContent)=>{ return resolve(folderContent)});
         }else{
             GetFolderContent(intitedclient,klassNr,folderName)
