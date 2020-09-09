@@ -1,2 +1,4 @@
 node_modules/
 credentials.json
+test.js
+read.js

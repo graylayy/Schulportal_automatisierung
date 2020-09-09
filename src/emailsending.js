@@ -16,11 +16,17 @@ async function GetCredentials(){
   }    
 )}
 
+function deletefile(filename){
+  fs.unlink("../download/"+filename, (err) => {
+      if (err) {
+        console.error(err)
+        return
+      }
+  })
+}
 
-async function sendFile(filenametoSent) {
-  
+module.exports.sendFile= async function sendFile(filenametoSent) {
   const credentials=await GetCredentials();
-  console.log(credentials)
   var transporter = nodemailer.createTransport({
     host: credentials[0],
     port: credentials[1],
@@ -32,13 +38,13 @@ async function sendFile(filenametoSent) {
   });
 
   var mailOptions = {
-    from: "schneider_development@web.de",
+    from: credentials[2],
     to: credentials[4],
     attachments: [
       {
         // file on disk as an attachment
         filename: filenametoSent,
-        path: "../"+filenametoSent, // stream this file
+        path: "../download/"+filenametoSent, // stream this file
       }
     ]
   };
@@ -46,10 +52,10 @@ async function sendFile(filenametoSent) {
   transporter.sendMail(mailOptions, function (error, info) {
     if (error) {
       console.log(error);
-    } else {
-      console.log("Email sent: " + info.response);
     }
-  });
+    else {
+      console.log( "\""+filenametoSent+"\""+" sent: " + info.response);
+      deletefile(filenametoSent);
+    }
+  })
 }
-
-sendFile();

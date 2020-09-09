@@ -1,5 +1,5 @@
 const { createClient } = require("webdav");
-const fs = require('fs')
+const fs = require('fs');
 const path = require('path');
 
 
@@ -34,11 +34,9 @@ function InitializeClient(credentials){
 
 async function GetAllContent(client){
     var items=[];
-    var request;
-    var requestUrl;
     for(i=0;i<kurse.length;i++){
-        requestUrl="/22-"+kurse[i]+"@magydo.schulportal-erzbistum-pb.de"
-        request = await client.getDirectoryContents(requestUrl);
+        var requestUrl="/22-"+kurse[i]+"@magydo.schulportal-erzbistum-pb.de/storage"
+        var request = await client.getDirectoryContents(requestUrl);
         items.push(request)
     }
     return items; 
@@ -79,5 +77,14 @@ module.exports.requestFolder =function requestFolder(klassNr,folderName){
             .then((folderContent)=>{ return resolve(folderContent)});
 
         }
+    })
+}
+
+
+module.exports.downloadFile=function downloadFile(filedir,filename){
+    return new Promise(function(resolve) {
+    intitedclient
+    .createReadStream(filedir,filename)
+    .pipe(fs.createWriteStream("../download/"+filename))
     })
 }
