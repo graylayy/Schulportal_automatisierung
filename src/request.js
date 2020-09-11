@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 
-const kurse=["kr-gk-4","d-gk-2","e-pk-2","mu-gk-2","d-gk-2","if-gk-1","e-gk-2","m-lk-2","ek-lk-2","ch-gk-2","sw-gk-2","stufe"]
+const kurse=["kr-gk-4","d-gk-2","e-pk-2","mu-gk-2","if-gk-1","e-gk-2","m-lk-2","ek-lk-2","ch-gk-2","sw-gk-2","stufe"]
 
 async function GetCredentials(){  
     const credentialsPath = path.join(__dirname,"..","/credentials.json")
@@ -33,7 +33,7 @@ function InitializeClient(credentials){
 }
 
 async function GetAllContent(client){
-    var items=[];
+    let items=[];
     for(i=0;i<kurse.length;i++){
         var requestUrl="/22-"+kurse[i]+"@magydo.schulportal-erzbistum-pb.de/storage"
         var request = await client.getDirectoryContents(requestUrl);
@@ -42,10 +42,12 @@ async function GetAllContent(client){
     return items; 
 }
 
-async function GetFolderContent(client,klassNr,folderName){
-    var requestUrl="/22-"+kurse[klassNr]+"@magydo.schulportal-erzbistum-pb.de/storage/"+folderName
-    folderContent= await client.getDirectoryContents(requestUrl);
-    return folderContent
+async function GetFolderContent(client,folderName){
+    let items=[];
+    for(i=0;i<folderName.length;i++){
+    items[i]= await client.getDirectoryContents(folderName[i]);
+    }
+    return items;
 }
 
 module.exports.requestAll =function requestAll(){
@@ -64,16 +66,16 @@ module.exports.requestAll =function requestAll(){
     })
 }
 
-module.exports.requestFolder =function requestFolder(klassNr,folderName){
+module.exports.requestFolders =function requestFolders(folderName){
     return new Promise(function(resolve) {
         if(typeof (intitedclient) ==='undefined'){
             GetCredentials()
             .then((credentials) =>InitializeClient(credentials))
             .then((client)=>intitedclient=client)
-            .then((intitedclient)=>GetFolderContent(intitedclient,klassNr,folderName))
+            .then((intitedclient)=>GetFolderContent(intitedclient,folderName))
             .then((folderContent)=>{ return resolve(folderContent)});
         }else{
-            GetFolderContent(intitedclient,klassNr,folderName)
+            GetFolderContent(intitedclient,folderName)
             .then((folderContent)=>{ return resolve(folderContent)});
 
         }
@@ -83,8 +85,9 @@ module.exports.requestFolder =function requestFolder(klassNr,folderName){
 
 module.exports.downloadFile=function downloadFile(filedir,filename){
     return new Promise(function(resolve) {
+    let downloadUrl=filedir
     intitedclient
-    .createReadStream(filedir,filename)
-    .pipe(fs.createWriteStream("../download/"+filename))
+    .createReadStream(downloadUrl)
+    .pipe(fs.createWriteStream("../download/"+filename));
     })
 }

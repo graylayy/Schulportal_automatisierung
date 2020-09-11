@@ -52,6 +52,7 @@ module.exports.sendFile= async function sendFile(filenametoSent) {
   transporter.sendMail(mailOptions, function (error, info) {
     if (error) {
       console.log(error);
+      deletefile(filenametoSent);
     }
     else {
       console.log( "\""+filenametoSent+"\""+" sent: " + info.response);
