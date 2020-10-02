@@ -52,7 +52,7 @@ function CheckupFile(file){
             request.downloadFile(file.filename,file.basename)
             .then(setTimeout(mail.sendFile, 1000, file.basename))
         }else{
-            console.log("File found at: "+file.filename+"cannot cannot be sent to Goodnotes")
+            console.log("File found at: "+file.filename+" cannot cannot be sent to Goodnotes")
         }
         
     };
