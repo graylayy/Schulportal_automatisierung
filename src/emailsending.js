@@ -17,7 +17,7 @@ async function GetCredentials(){
 )}
 
 function deletefile(filename){
-  fs.unlink("../download/"+filename, (err) => {
+  fs.unlink(__dirname+"/../download/"+filename, (err) => {
       if (err) {
         console.error(err)
         return
@@ -36,15 +36,15 @@ module.exports.sendFile= async function sendFile(filenametoSent) {
       pass: credentials[3],
     },
   });
-
+  console.log("EMAIL: "+filenametoSent)
   var mailOptions = {
     from: credentials[2],
     to: credentials[4],
     attachments: [
       {
         // file on disk as an attachment
-        filename: filenametoSent,
-        path: "../download/"+filenametoSent, // stream this file
+        filename: "***"+filenametoSent,
+        path: __dirname+"/../download/"+filenametoSent, // stream this file
       }
     ]
   };

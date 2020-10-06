@@ -47,10 +47,10 @@ function CheckForlastmod(allStorages){
 }
 
 function CheckupFile(file){
-    if((Date.now()-Date.parse(file.lastmod)<86400000)){
+    if((Date.now()-Date.parse(file.lastmod)<86400000)){//86400000
         if(file.mime=='application/pdf'){
             request.downloadFile(file.filename,file.basename)
-            .then(setTimeout(mail.sendFile, 1000, file.basename))
+            setTimeout(mail.sendFile, 10000, file.basename)
         }else{
             console.log("File found at: "+file.filename+"cannot cannot be sent to Goodnotes")
         }

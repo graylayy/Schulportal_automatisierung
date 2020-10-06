@@ -84,10 +84,8 @@ module.exports.requestFolders =function requestFolders(folderName){
 
 
 module.exports.downloadFile=function downloadFile(filedir,filename){
-    return new Promise(function(resolve) {
     let downloadUrl=filedir
     intitedclient
     .createReadStream(downloadUrl)
-    .pipe(fs.createWriteStream("../download/"+filename));
-    })
+    .pipe(fs.createWriteStream(__dirname+"/../download/"+filename));
 }
